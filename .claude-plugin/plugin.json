@@ -1,0 +1,6 @@
+{
+  "name": "code-review",
+  "description": "Reviews local code changes and GitHub pull requests for bugs, security issues, performance, and clarity.",
+  "version": "0.1.0",
+  "license": "Apache-2.0"
+}

@@ -1,41 +1,66 @@
-# Gemini CLI Code Review Extension
+# Claude Code — Code Review Plugin
 
-The Code Review extension is an open-source Gemini CLI extension, built to enhance your repository's code quality.  The extension adds a new command to Gemini CLI that analyzes code changes to identify a variety of code quality issues.
+A Claude Code plugin that adds high-quality, opinionated code review for both **local branch changes** and **GitHub pull requests**.
 
-This extension is brought to you by the authors of the [Gemini Code Assist GitHub App](https://github.com/apps/gemini-code-assist), which provides code reviews directly in your GitHub pull requests.
+This plugin is brought to you by the authors of the [Gemini Code Assist GitHub App](https://github.com/apps/gemini-code-assist), which provides code reviews directly in your GitHub pull requests.
+
+## Requirements
+
+- [Claude Code](https://docs.claude.com/en/docs/claude-code) installed.
+- `git` available on `PATH`.
+- For pull request review only: the [`gh` CLI](https://cli.github.com/) installed and authenticated (`gh auth login`).
 
 ## Installation
 
-Install the Code Review extension by running the following command from your terminal *(requires Gemini CLI v0.4.0 or newer)*:
+Clone this repo somewhere local, then load it as a Claude Code plugin from its local path. For example:
 
 ```bash
-gemini extensions install https://github.com/gemini-cli-extensions/code-review
+git clone https://github.com/gemini-cli-extensions/code-review.git ~/.claude/plugins/code-review
 ```
 
-If you do not yet have Gemini CLI installed, or if the installed version is older than 0.4.0, see
-[Gemini CLI installation instructions](https://github.com/google-gemini/gemini-cli?tab=readme-ov-file#-installation).
+Restart Claude Code (or reload plugins). Confirm the plugin is loaded with `/plugin`. The `code-review`, `pr-code-review`, and `code-review-commons` skills should be listed, along with the `/code-review` and `/pr-code-review` slash commands.
 
-## Use the extension
+## Usage
 
-### Reviewing code changes
+### Review local changes
 
-The Code Review extension adds the `/code-review` command to Gemini CLI which analyzes code changes on your current branch for quality issues.
+```text
+/code-review
+```
 
-### Reviewing a pull request
+Reviews the diff between the current branch and its merge base with `origin/HEAD` and prints structured findings (severity-tagged, with suggested patches).
 
-The Code Review extension adds the `/pr-code-review` command to Gemini CLI which analyzes code changes on your pull request for quality issues.
+You can also just ask Claude in natural language — the `code-review` skill auto-triggers on phrases like *"review my changes"*, *"review this diff"*, or *"review my branch"*.
 
-To use this extension for a pull request, you need to [enable](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md) the [github mcp server](https://github.com/github/github-mcp-server), and provide pull request information. You can either provide through `/pr-code-review link/to/pull/request` or by [configuring](https://github.com/google-gemini/gemini-cli/blob/main/docs/reference/configuration.md#environment-variables-and-env-files) the following environment variables:
-- `REPOSITORY`: The github repository which contains the pull request.
-- `PULL_REQUEST_NUMBER`: The pull request number that need the code review.
-- `ADDITIONAL_CONTEXT`: Additional context or specific area that should focus on.
+### Review a pull request
 
-## Resources
+```text
+/pr-code-review https://github.com/owner/repo/pull/123
+```
 
-- [Gemini CLI extensions](https://github.com/google-gemini/gemini-cli/blob/main/docs/extensions/index.md): Documentation about using extensions in Gemini CLI
-- [Blog post](https://blog.google/technology/developers/gemini-cli-extensions/): Announcement of Gemini CLI Extensions
-- [GitHub issues](https://github.com/gemini-cli-extensions/code-review/issues): Report bugs or request features
+Or pass the number directly when inside a clone of the target repo:
+
+```text
+/pr-code-review 123
+```
+
+The `pr-code-review` skill fetches the PR via `gh pr view` / `gh pr diff`, produces inline severity-tagged comments and a summary, and submits a `COMMENT`-type review to GitHub.
+
+Configuration via environment variables (any/all of these can be set instead of passing arguments):
+
+- `REPOSITORY` — `owner/repo` of the PR.
+- `PULL_REQUEST_NUMBER` — the PR number.
+- `ADDITIONAL_CONTEXT` — extra instructions or focus areas for the reviewer.
+
+The skill never submits `APPROVE` or `REQUEST_CHANGES` events — only `COMMENT` reviews.
+
+## How it works
+
+- `skills/code-review-commons/SKILL.md` — shared reviewer persona, objective, instructions, and severity classification (CRITICAL / HIGH / MEDIUM / LOW). Activated by both review skills.
+- `skills/code-review/SKILL.md` — local-diff review skill.
+- `skills/pr-code-review/SKILL.md` — pull request review skill (uses `gh`).
+- `commands/code-review.md`, `commands/pr-code-review.md` — slash command entry points.
 
 ## Legal
 
-- License: [Apache License 2.0](https://github.com/gemini-cli-extensions/code-review/blob/main/LICENSE)
+- License: [Apache License 2.0](LICENSE)

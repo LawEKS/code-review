@@ -1,14 +1,23 @@
-description = "Reviews the code changes on your current branch"
-prompt = """
-<CONTEXT>
-    **Code Changes**: call the `git diff -U5 --merge-base origin/HEAD` tool to retrieve the changes.
-</CONTEXT>
+---
+name: code-review
+description: Reviews uncommitted or in-flight code changes on the current branch for bugs, security issues, performance bottlenecks, and clarity. Use when the user asks to review their changes, diff, branch, staged code, or work-in-progress before committing or opening a PR.
+allowed-tools: Bash(git diff:*), Bash(git merge-base:*), Bash(git status:*), Bash(git rev-parse:*), Read, Grep, Glob
+---
 
-<PROTOCOL>
-Activate the `code-review-commons` skill for persona, objective, instructions and critical constraints. Then follow the exact structure and rules in the `<OUTPUT>` section.
-</PROTOCOL>
+# Code Review (local diff)
 
-<OUTPUT>
+## CONTEXT
+
+**Code Changes**: run `git diff -U5 --merge-base origin/HEAD` to retrieve the changes on the current branch relative to its merge base with the remote default branch.
+
+If `origin/HEAD` is not set, fall back to `git diff -U5 --merge-base origin/main` (or `origin/master`). If there is no remote, diff against the local default branch.
+
+## PROTOCOL
+
+Activate the `code-review-commons` skill for persona, objective, instructions, and critical constraints. Then follow the exact structure and rules in the `<OUTPUT>` section below.
+
+## OUTPUT
+
 The output **MUST** be clean, concise, and structured exactly as follows.
 
 **If no issues are found:**
@@ -43,5 +52,3 @@ More details about this problem, including where else it occurs if applicable (e
 ## File: path/to/file/two
 ### L<LINE_NUMBER_3>: [HIGH] Summary of the issue in the next file.
 Details...
-</OUTPUT>
-"""

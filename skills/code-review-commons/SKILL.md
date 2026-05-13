@@ -1,7 +1,6 @@
 ---
 name: code-review-commons
-description: Common guidelines, persona and critical constraints for performing high-quality code reviews. Use this skill when performing a /code-review or /pr-code-review command.
-user-invokable: false
+description: Shared persona, objective, instructions, and critical constraints used by the code-review and pr-code-review skills. Activated by those skills; not intended for direct user invocation.
 ---
 
 # Code Review Commons
